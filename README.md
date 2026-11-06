@@ -27,6 +27,12 @@ These benchmark labels do not implement runtime confidence routing. The POC requ
 
 The supplied workflow produced 37 normalized 384-dimensional vectors. The chosen 500-token chunk size with 60-token overlap exceeds the embedding model's 128-token input limit: 31 of 37 chunks exceed that limit. This is a diagnosed baseline limitation, not a recommended production configuration. The evaluation composite classified 5/10 questions as AUTO ANSWER, compared with 4/10 on the separate test set. Only 4/10 evaluation cases and 2/10 test cases met all four individual metric thresholds. Preserve these results as a baseline; rebuild with chunks inside the model limit and table rows that retain column headers, then validate on fresh cases before release.
 
+## Corrected final run
+
+The deployed index now uses 110-token chunks with a 20-token overlap. It contains 196 vectors; measured chunk lengths are 10-112 tokens including special tokens, so none exceed the 128-token model limit. Evaluation: 5/10 composite passes, 3/10 all-metric passes, mean composite 0.701. Test retest: 4/10 composite passes, 3/10 all-metric passes, mean composite 0.704. The test questions were reused after baseline exposure, so a fresh holdout is required before release. The chunk correction alone did not improve the 40% composite test pass rate. Property-table retrieval remains weak.
+
+DeepEval may return asynchronous results in completion order. Reporting now joins results to the unique question input and asserts equality of the generated answer, rather than pairing results by list position. Aggregate scores were unaffected by the ordering issue, but question-level labels required correction.
+
 Docker endpoint checks returned HTTP 200 for the welcome route and all three POST endpoints. The frontend and API ports are forwarded to localhost only. This run uses local Docker rather than GitHub Codespaces.
 
 ## Deliberate corrections to the supplied notebook
