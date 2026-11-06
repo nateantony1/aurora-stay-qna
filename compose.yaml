@@ -1,0 +1,20 @@
+services:
+  backend:
+    build: ./backend
+    volumes:
+      - ./backend/faiss_index:/app/faiss_index:ro
+    ports:
+      - "127.0.0.1:7860:7860"
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_API_BASE: ${OPENAI_API_BASE:-https://api.openai.com/v1}
+    restart: unless-stopped
+  frontend:
+    build: ./frontend
+    ports:
+      - "127.0.0.1:8501:8501"
+    environment:
+      BACKEND_URL: http://backend:7860
+    depends_on:
+      - backend
+    restart: unless-stopped
