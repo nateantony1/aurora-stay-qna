@@ -44,13 +44,19 @@ The earlier 196-vector index used 110-token chunks with a 20-token overlap. Leng
 
 DeepEval may return asynchronous results in completion order. Reporting now joins results to the unique question input and asserts equality of the generated answer, rather than pairing results by list position. Aggregate scores were unaffected by the ordering issue, but question-level labels required correction.
 
-Docker endpoint checks returned HTTP 200 for the welcome route and all three POST endpoints in the earlier run. The revised deployment must pass the same checks. Property matrix amounts are training examples; verify the live property profile before quoting a guest.
+Docker endpoint checks returned HTTP 200 for the welcome route and all three POST endpoints in the earlier run. The revised local deployment also passed all four route checks on 14 November 2026. Property matrix amounts are training examples; verify the live property profile before quoting a guest.
 
 ## Codespaces
 
 The supplied template requests a Codespaces demonstration. `.devcontainer/devcontainer.json` provisions Docker-in-Docker, builds the application, starts Compose and forwards ports 7860 and 8501. Configure the approved API credential as a repository-scoped Codespaces secret before generation. No credential is included in the repository or build arguments.
 
-Get the actual forwarded URLs from the Codespaces Ports panel. Configuration alone is not proof of a successful remote deployment: verify health, answers and chunks and capture the live interface before claiming completion. Ports are private by default. Any public access needs an explicit access decision. The repository is private, so assessors need authorized access to inspect source files.
+The repository was made public with the owner's approval on 14 November 2026. Ports 7860 and 8501 were temporarily made public for the supplied guide's demonstration. The notebook deployment section was reexecuted against the actual forwarded HTTPS API: health, /v1/relevant_chunks and /v1/answer_with_relevant_chunks returned HTTP 200 without authentication headers or cookies, and both inference routes returned the same three source passages. All 60 core template cells had previously executed successfully; 11 deployment cells were then reexecuted for this remote phase.
+
+Historical demonstration URLs:
+- API: https://obscure-goldfish-64w56gp4p7r255xj-7860.app.github.dev/
+- UI: https://obscure-goldfish-64w56gp4p7r255xj-8501.app.github.dev/
+
+The supplied guide calls for deleting the Codespace after capturing evidence. These demonstration URLs are temporary and are not a permanent hosted service. To reproduce the demonstration, create a new Codespace from this public repository, supply an authorized runtime credential, use its actual forwarded URLs and delete the Codespace after testing. Keep public API exposure limited to the approved demonstration.
 
 ## Deliberate corrections to the supplied notebook
 
