@@ -2,15 +2,8 @@
 from langchain_openai import ChatOpenAI
 import os
 
-# Retrieve the top-k relevant chunks from the vector store
-def retrieve(query: str, k: int = 2,vectorstore=None) -> list[str]:
-    results = vectorstore.similarity_search(query, k=k)
-
-    # Return each chunk with its content and metadata
-    return [
-        f"Content:\n{r.page_content}\n\nMetadata:\n{r.metadata}"
-        for r in results
-    ]
+# Return complete, labelled passages after semantic/keyword search and reranking.
+from hybrid_retriever import retrieve
 
 # Define the generation function that prompts the LLM with retrieved context
 def generate(query, retrieved_chunks,model) -> str:
@@ -49,7 +42,7 @@ def generate(query, retrieved_chunks,model) -> str:
 # Define the full RAG pipeline combining retrieval and generation
 def rag(
     query: str,
-    k: int = 2,
+    k: int = 3,
     model_name: str = "gpt-4o-mini",
     temperature: float = 0.0,
     top_p: float = 1.0,

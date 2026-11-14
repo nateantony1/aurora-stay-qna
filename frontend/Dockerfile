@@ -16,5 +16,5 @@ RUN pip install -r requirements.txt
 
 # Run the Streamlit application on port 8501
 # 0.0.0.0 makes the application accessible outside the container
-# XSRF protection is disabled for easier external access
+# Streamlit's default XSRF protection remains enabled.
 CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]

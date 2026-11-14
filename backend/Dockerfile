@@ -23,6 +23,9 @@ HuggingFaceEmbeddings( \
     encode_kwargs={'normalize_embeddings': True} \
 )"
 
+# Cache the fixed cross-encoder used to rerank hybrid retrieval candidates.
+RUN python -c "from sentence_transformers import CrossEncoder; CrossEncoder('cross-encoder/ms-marco-MiniLM-L6-v2', device='cpu', max_length=512)"
+
 # Force offline mode at runtime so it uses the cached model
 ENV TRANSFORMERS_OFFLINE=1
 ENV HF_HUB_OFFLINE=1

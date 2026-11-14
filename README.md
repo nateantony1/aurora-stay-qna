@@ -15,7 +15,7 @@ Ports bind only to the local computer. The frontend reaches the backend through 
 - POST /v1/answer_with_relevant_chunks returns a generated answer, chunks, and parameters.
 - POST /v1/answer returns only the answer.
 
-Default presentation run: k 3, temperature 0, top_p 1, max_tokens 512. Generation uses only retrieved policy information and abstains when the documents are insufficient.
+Default presentation run: k 3, temperature 0, top_p 1, max_tokens 512. The prompt instructs generation to use retrieved information and abstain when insufficient. These instructions do not guarantee correctness; staff must verify answers.
 
 ## Evaluation
 
@@ -27,13 +27,30 @@ These benchmark labels do not implement runtime confidence routing. The POC requ
 
 The supplied workflow produced 37 normalized 384-dimensional vectors. The chosen 500-token chunk size with 60-token overlap exceeds the embedding model's 128-token input limit: 31 of 37 chunks exceed that limit. This is a diagnosed baseline limitation, not a recommended production configuration. The evaluation composite classified 5/10 questions as AUTO ANSWER, compared with 4/10 on the separate test set. Only 4/10 evaluation cases and 2/10 test cases met all four individual metric thresholds. Preserve these results as a baseline; rebuild with chunks inside the model limit and table rows that retain column headers, then validate on fresh cases before release.
 
-## Corrected final run
+## Earlier chunk-limit correction, 6 November
 
-The deployed index now uses 110-token chunks with a 20-token overlap. It contains 196 vectors; measured chunk lengths are 10-112 tokens including special tokens, so none exceed the 128-token model limit. Evaluation: 5/10 composite passes, 3/10 all-metric passes, mean composite 0.701. Test retest: 4/10 composite passes, 3/10 all-metric passes, mean composite 0.704. The test questions were reused after baseline exposure, so a fresh holdout is required before release. The chunk correction alone did not improve the 40% composite test pass rate. Property-table retrieval remains weak.
+The earlier 196-vector index used 110-token chunks with a 20-token overlap. Lengths were 10-112 tokens, within the model's 128-token limit, but 63 chunks contained only Markdown separators. Evaluation: 5/10 composite passes, 3/10 all-metric passes, mean composite 0.701. Test retest: 4/10 composite passes, 3/10 all-metric passes, mean composite 0.704. The test questions had already been exposed, so these are development retests.
+
+## Retrieval rebuild, 14 November 2026
+
+- Reuse the original Docling 2.126.0 exports with SHA-256 provenance for all four supplied PDFs. No benchmark questions, answers or reference contexts enter the index builder.
+- Remove separator-only rows and administrative navigation content. Preserve table column labels, source filenames and the training-only qualification on property rows. Deduplicate repeated passages.
+- Build 125 normalized 384-dimensional vectors with HarishMaths/Hotel-Policy-Embedding. Splitting is capped at 110 tokens with overlap 20; actual chunks are 36-99 tokens including special tokens. Zero separator-only or over-limit chunks remain.
+- Combine up to 48 dense and 48 BM25 candidates with reciprocal-rank fusion. Exclude rows for incompatible explicit property codes, then rank with cross-encoder/ms-marco-MiniLM-L6-v2 and return three passages.
+- Normalize the unfamiliar AuroraStay brand to "hotel" for ranking only. The original question and source wording remain unchanged for generation and display.
+- Keep the original generation prompt, model and parameters and the original DeepEval 4.2.2 GEval judge definitions. The latest full notebook run and PDF report the measured results. All new scores are retests; a fresh independent holdout is needed before operational release.
+
+`backend/build_index.py` builds the paired FAISS files from `backend/policy_markdown.json`. `backend/hybrid_retriever.py` is shared by the notebook and API. The Dockerfile caches both embedding and reranking models at build time.
 
 DeepEval may return asynchronous results in completion order. Reporting now joins results to the unique question input and asserts equality of the generated answer, rather than pairing results by list position. Aggregate scores were unaffected by the ordering issue, but question-level labels required correction.
 
-Docker endpoint checks returned HTTP 200 for the welcome route and all three POST endpoints. The frontend and API ports are forwarded to localhost only. This run uses local Docker rather than GitHub Codespaces.
+Docker endpoint checks returned HTTP 200 for the welcome route and all three POST endpoints in the earlier run. The revised deployment must pass the same checks. Property matrix amounts are training examples; verify the live property profile before quoting a guest.
+
+## Codespaces
+
+The supplied template requests a Codespaces demonstration. `.devcontainer/devcontainer.json` provisions Docker-in-Docker, builds the application, starts Compose and forwards ports 7860 and 8501. Configure the approved API credential as a repository-scoped Codespaces secret before generation. No credential is included in the repository or build arguments.
+
+Get the actual forwarded URLs from the Codespaces Ports panel. Configuration alone is not proof of a successful remote deployment: verify health, answers and chunks and capture the live interface before claiming completion. Ports are private by default. Any public access needs an explicit access decision. The repository is private, so assessors need authorized access to inspect source files.
 
 ## Deliberate corrections to the supplied notebook
 

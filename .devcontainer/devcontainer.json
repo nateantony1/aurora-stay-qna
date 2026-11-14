@@ -1,0 +1,15 @@
+{
+  "name": "AuroraStay assessment",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+  "forwardPorts": [7860, 8501],
+  "portsAttributes": {
+    "7860": {"label": "AuroraStay Flask API", "onAutoForward": "notify"},
+    "8501": {"label": "AuroraStay Streamlit", "onAutoForward": "openBrowser"}
+  },
+  "postCreateCommand": "docker compose build",
+  "postStartCommand": "docker compose up -d",
+  "remoteUser": "vscode"
+}
